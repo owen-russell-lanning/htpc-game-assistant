@@ -1,4 +1,5 @@
 const express = require("express");
+const { scanForDevices } = require("./lib/bluetooth-wrapper");
 const app = express();
 
 
@@ -9,6 +10,12 @@ app.get('/', (req, res) => {
     res.send('HTPC Game Assistant Server')
 })
 
-app.listen(PORT, () => {
-    console.log('server listening on port ' + PORT);
+scanForDevices().then(() =>{
+    app.listen(PORT, () => {
+        console.log('server listening on port ' + PORT);
+    })
+    
 })
+
+
+
