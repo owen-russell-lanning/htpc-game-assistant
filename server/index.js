@@ -6,6 +6,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser');
 const { openSteamLinkShortcut } = require("./lib/shortcuts");
 
+var args = process.argv.slice(2);
 const app = express();
 var jsonParser = bodyParser.json()
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -14,7 +15,7 @@ const DEBUG = true;
 
 setShowLog(DEBUG);
 
-const PORT = 8080;
+const PORT = args.length > 0 && args[0] ? args[0] : 8080;
 
 initBt();
 
