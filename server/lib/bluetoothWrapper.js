@@ -1,4 +1,4 @@
-const { BLUETOOTH_SCAN_LENGTH_SECONDS, BLUETOOTH_PAIR_WAIT_LENGTH_SECONDS, BLUETOOTH_CONNECT_WAIT_LENGTH_SECONDS } = require('../config/constants');
+const { BLUETOOTH_SCAN_LENGTH_SECONDS, BLUETOOTH_PAIR_WAIT_LENGTH_SECONDS, BLUETOOTH_CONNECT_WAIT_LENGTH_SECONDS, BLUETOOTH_COOLDOWN_WAIT_SECONDS } = require('../config/constants');
 const { execSync, spawn, exec } = require('child_process');
 const { sleep, spawnProcessWithTimeout, containsLine, lineEndsWith } = require('./helpers');
 const { log } = require('console');
@@ -9,22 +9,9 @@ async function initBt() {
     execSync("bluetoothctl pairable on");
 }
 
-/**
- * scans for bluetooth devices for a short period of time
- * @returns a list of bluetooth devices found and any existing ones available
- */
-async function scanForDevices() {
-
-    /** scan for a few seconds */
-    await spawnProcessWithTimeout("bluetoothctl", ["scan", "on"], BLUETOOTH_SCAN_LENGTH_SECONDS)
-
-    /** list all devices */
-    var devicesStr = execSync("bluetoothctl devices").toString();
+function parseDeviceList(str) {
+    const devicesStrSplit = str.split("\n");
     var devices = [];
-
-
-    /** parts devices into objects */
-    var devicesStrSplit = devicesStr.split("\n");
     for (var i = 0; i < devicesStrSplit.length; i++) {
         if (devicesStrSplit[i].trim() == "") {
             continue;
@@ -35,6 +22,49 @@ async function scanForDevices() {
             devices.push(bd);
         }
     }
+
+    return devices;
+}
+
+/**
+ * scans for bluetooth devices for a short period of time
+ * @returns a list of bluetooth devices found and any existing ones available
+ */
+async function scanForDevices(retries = 3) {
+
+    /** scan for a few seconds */
+    await spawnProcessWithTimeout("bluetoothctl", ["scan", "on"], BLUETOOTH_SCAN_LENGTH_SECONDS)
+
+    /** list all devices */
+    var devicesStr = execSync("bluetoothctl devices").toString();
+
+
+
+    /** parse devices into objects */
+    var devices = parseDeviceList(devicesStr);
+
+    if (devices.length == 0 && retries == 0) {
+        try {
+            /** after 3 tries, reboot bluetooth*/
+            log("rebooting bluetooth");
+            execSync("bluetoothctl power off");
+            await sleep(3);
+            execSync("bluetoothctl power on");
+        } catch (e) {
+            log("issue rebooting bluetooth");
+            log(e);
+        }
+        return await scanForDevices(retries - 1);
+    }
+    else if (devices.length == 0 && retries > 0) {
+        log("No devices. Potential error. Waiting and retrying");
+        await sleep(BLUETOOTH_COOLDOWN_WAIT_SECONDS * 1000);
+
+
+        return await scanForDevices(retries - 1);
+    }
+
+
 
     return devices;
 
@@ -122,13 +152,16 @@ function trustDevice(mac) {
 }
 
 function removeDevice(mac) {
-    if(!isMac){
+    if (!isMac(mac)) {
         return;
     }
 
     /** remove twice due to bluetoothctl behaviour */
-    execSync("bluetoothctl remove " + mac);
-    execSync("bluetoothctl remove " + mac);
+    try {
+        execSync("bluetoothctl remove " + mac);
+        execSync("bluetoothctl remove " + mac);
+    }
+    catch { }
 
 }
 
@@ -138,6 +171,25 @@ function isMac(mac) {
     const parts = mac.split(":");
     return parts.length == 6 && regex.test(mac);
 }
+
+function getPairedDevices() {
+    const resp = execSync("bluetoothctl devices Paired").toString();
+    var devices = parseDeviceList(resp);
+
+    /** check if device is connected */
+    for (var i = 0; i < devices.length; i++) {
+        devices[i].Paired = true;
+
+        const infoResp = execSync("bluetoothctl info " + devices[i].Mac).toString();
+        devices[i].Connected = containsLine(infoResp, "Connected: yes");
+
+    }
+
+
+    return devices;
+
+}
+
 
 class BluetoothDevice {
 
@@ -165,10 +217,10 @@ class BluetoothDevice {
      * 
      * @returns a simple version of the object
      */
-    simplify(){
-        return { name: this.Name, mac: this.Mac,paired: this.Paired, connected: this.Connected };
+    simplify() {
+        return { name: this.Name, mac: this.Mac, paired: this.Paired, connected: this.Connected };
     }
 
 }
 
-module.exports = {removeDevice, initBt, scanForDevices, pairAndConnect, BluetoothDevice }
+module.exports = { getPairedDevices, removeDevice, initBt, scanForDevices, pairAndConnect, BluetoothDevice }

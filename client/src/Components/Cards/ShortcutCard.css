@@ -1,0 +1,13 @@
+.shortcut-card {
+   
+}
+
+.shortcut-card > img{
+    height: 100px;
+    border-radius: 12px;
+    width: auto;
+}
+
+.shortcut-card:is(.mobile) > img{
+ 
+}

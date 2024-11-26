@@ -1,0 +1,5 @@
+.section-container{
+    filter: drop-shadow(0px 0px 3px var(--light-shadow-color));
+    background-color: white;
+    border-radius: 12px;
+}

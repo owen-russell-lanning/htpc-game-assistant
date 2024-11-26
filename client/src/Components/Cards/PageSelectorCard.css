@@ -1,0 +1,19 @@
+.page-selector-card{
+ 
+
+    
+}
+
+.page-selector-card:not(:is(.mobile)){
+    min-width: 250px;
+}
+
+.page-selector-card > *{
+    color: unset;
+}
+
+
+
+.page-selector-card:is(.mobile) {
+    width: 100%;
+}

@@ -1,3 +1,4 @@
 const BLUETOOTH_ROUTE_PREFIX = "bluetooth";
+const SHORTCUTS_ROUTE_PREFIX = "shortcuts";
 
-module.exports = {BLUETOOTH_ROUTE_PREFIX};
+module.exports = {BLUETOOTH_ROUTE_PREFIX, SHORTCUTS_ROUTE_PREFIX};

@@ -1,0 +1,28 @@
+.bluetooth-device-card {
+    width: 300px;
+    padding: 2px;
+    background-color: white;
+    cursor: pointer;
+    
+}
+.bluetooth-device-card:not(:is(.paired)){
+
+}
+
+.bluetooth-device-card:is(.connecting),
+.bluetooth-device-card:is(.connected) {
+    outline: 2px solid var(--bs-primary);
+}
+
+.bluetooth-device-card:is(.mobile) {
+    width: 100%;
+}
+
+
+.bluetooth-device-card:hover {
+    outline: solid 1.5px var(--bs-primary);
+}
+
+.bluetooth-device-card:active {
+    transform: scale(1.02, 1.02);
+}

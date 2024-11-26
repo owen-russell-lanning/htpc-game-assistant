@@ -1,24 +1,25 @@
 import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from './Pages/HomePage';
+import { BLUETOOTH_ROUTE, HOME_ROUTE } from './config/RouteConstants';
+import PrimaryNavbar from './Components/Misc/PrimaryNavbar';
+import BluetoothPage from './Pages/BluetoothPage';
+
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+
+
+    <BrowserRouter>
+      <PrimaryNavbar></PrimaryNavbar>
+      <Routes>
+        <Route path={HOME_ROUTE} element={<HomePage></HomePage>}></Route>
+        <Route path={BLUETOOTH_ROUTE} element={<BluetoothPage></BluetoothPage>}></Route>
+
+      </Routes>
+    </BrowserRouter >
+
   );
 }
 

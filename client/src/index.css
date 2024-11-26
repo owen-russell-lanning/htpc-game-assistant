@@ -11,3 +11,24 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+:root {
+  --light-shadow-color: rgba(120, 120, 120, 0.4);
+  --bs-body-bg: #e9e9e9;
+}
+
+a {
+  text-decoration: none;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
