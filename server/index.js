@@ -1,7 +1,7 @@
 const express = require("express");
 const { scanForDevices, pair, pairAndConnect, initBt, removeDevice, getPairedDevices } = require("./lib/bluetoothWrapper");
 const { setShowLog } = require("./lib/logHandler");
-const { BLUETOOTH_ROUTE_PREFIX, SHORTCUTS_ROUTE_PREFIX } = require("./config/routeConstants");
+const { BLUETOOTH_ROUTE_PREFIX, SHORTCUTS_ROUTE_PREFIX, UI_FOLDER } = require("./config/routeConstants");
 const cors = require('cors')
 const bodyParser = require('body-parser');
 const { openSteamLinkShortcut } = require("./lib/shortcuts");
@@ -20,9 +20,7 @@ initBt();
 
 app.use(cors())
 
-app.get('/', (req, res) => {
-    res.send('HTPC Game Assistant Server')
-})
+
 
 
 /** bluetooth routes */
@@ -64,7 +62,12 @@ app.post("/" + SHORTCUTS_ROUTE_PREFIX + "/steamlink", async (req,res) =>{
     res.sendStatus(200);
 });
 
+/**
+ *  ui
+ */
+app.use(express.static(UI_FOLDER))
+
+
 app.listen(PORT, () => {
     console.log('server listening on port ' + PORT);
 })
-
